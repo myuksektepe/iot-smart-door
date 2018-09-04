@@ -1,0 +1,50 @@
+{% extends "_panelbase.html" %}
+{% load static %}
+{% block title %}SmaartDoor - Kartlar{% endblock %}
+{% block main %}
+    <h1 class="text-thin"><i class="fas fa-id-card"></i> Kartlar</h1>
+    <hr>
+    <div class="table-responsive">
+        <table id="cards" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Kart Kimliği</th>
+                <th>Tanımlı Kullanıcı</th>
+                <th>İzinli Kapılar</th>
+                <th>İzinsiz Kapılar</th>
+                <th>Yasaklı Kapılar</th>
+                <th>Oluşturulma Tarihi</th>
+                <th>Durumu</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for card in cards %}
+                <tr>
+                    <td>{{ card.id }}</td>
+                    <td>{{ card.identity }}</td>
+                    <td>{{ card.personnel.first_name }} {{ card.personnel.last_name }}</td>
+                    <td>
+                        {% if card.authorized_doors.first %}
+                            {{ card.authorized_doors.first }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if card.unauthorized_doors.first %}
+                            {{ card.unauthorized_doors.first }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if card.banned_doors.first %}
+                            {{ card.banned_doors.first }}
+                        {% endif %}
+                    </td>
+                    <td>{{ card.create_at }}</td>
+                    <td>{{ card.is_visible }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% block js_scripts %}{% endblock %}

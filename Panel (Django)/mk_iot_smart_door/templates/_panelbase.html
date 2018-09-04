@@ -1,0 +1,78 @@
+{% load static menu %}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <title>{% block title %}{% endblock title %}</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/plugins/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
+</head>
+<body class="{% block bodyclass %} {% endblock bodyclass %}">
+
+
+<div id="wrapper" class="toggled">
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar-brand text-center">
+                <img src="{% static "assets/img/logos/logo_light_alt_164x41.png" %}" alt="Smart Door">
+                <br>
+                Hoşgeldiniz, <b>{{ request.user.get_full_name }}</b>
+                <a class="btn btn-sm btn-dark" href="/logout">Güvenli Çıkış</a>
+            </li>
+            <li {% if request.get_full_path == "/panel/dashboard/" %}class="active"{% endif %}>
+                <a href="/panel/dashboard/">
+                    <i class="fas fa-list"></i>
+                    Giriş-Çıkış Kayıtları
+                </a>
+            </li>
+            <li {% if request.get_full_path == "/panel/cards/" %}class="active"{% endif %}>
+                <a href="/panel/cards/">
+                    <i class="fas fa-id-card"></i>
+                    Kartlar
+                </a>
+            </li>
+            <li {% if request.get_full_path == "/panel/doors/" %}class="active"{% endif %}>
+                <a href="/panel/doors/">
+                    <i class="fas fa-door-open"></i> Kapılar
+                </a>
+            </li>
+            <li {% if request.get_full_path == "/panel/personnels/" %}class="active"{% endif %}>
+                <a href="/panel/personnels/">
+                    <i class="fas fa-users"></i> Kullanıcılar
+                </a>
+            </li>
+        </ul>
+        <div class="closer"><</div>
+    </div>
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            {% block main %} {% endblock main %}
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/bootstrap.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'assets/plugins/fontawesome/fontawesome-all.min.js' %}"></script>
+<script src="{% static 'assets/plugins/DataTables/datatables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/js/app.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('table').DataTable({
+            "language": {
+                "url": "{% static "/assets/plugins/DataTables/Turkish.json" %}"
+            }
+        });
+    });
+</script>
+{% block js_scripts %}{% endblock js_scripts %}
+</body>
+</html>
