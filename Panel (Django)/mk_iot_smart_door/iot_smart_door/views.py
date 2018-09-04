@@ -75,7 +75,6 @@ def api_add_door(request):
     if request.GET:
         door_name = request.GET.get('door_name', False)
         if door_name:
-            # Doors.objects.raw('ALTER TABLE smartdoor_doors auto_increment = 1')
             door = Doors(name=door_name, is_visible=True)
             door.save()
             if door.id:
@@ -133,7 +132,7 @@ def api_control(request):
 
         door_id = request.GET.get('door_id', False)
         card_identity = request.GET.get('card_identity', False)
-        phonenumber = '05413190119'
+        phonenumber = '05422079752'
         now = time.strftime("%H:%M %Y-%m-%d")
 
         if door_id and card_identity:
@@ -150,7 +149,7 @@ def api_control(request):
 
                         if Cards.objects.filter(identity=card_identity, banned_doors__in=door_id).count() > 0:
                             sms_content = "{}({}) yasaklı olduğu {} kapısında giriş denemesi yaptı. {}".format(str(personnel), str(personnel.phone_number), str(door), now)
-                            sms_api_result = requests.get('https://api.makdos.com/v2/plus/system/sms_send?phonenumber=' + phonenumber + '&message=' + sms_content)
+                            sms_api_result = requests.get('SMS_GÖNDERME_API_YOLU?phonenumber=' + phonenumber + '&message=' + sms_content)
                             res = {
                                 'status': False,
                                 'card_identity': card_identity,
