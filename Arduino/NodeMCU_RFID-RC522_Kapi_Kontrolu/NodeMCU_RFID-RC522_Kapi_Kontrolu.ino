@@ -26,11 +26,11 @@
 */
 
 // Wifi Bağlantısı
-const char *ssid =  "WiFi ADINIZ";
-const char *pass =  "WiFi ŞİFRENİZ";
+const char *ssid =  "WIFI_ISMINIZ";
+const char *pass =  "WIFI_SIFRENIZ";
 
 // API Url
-const char *apiUrl =  "API URL ADRESİNİZ";
+const char *apiUrl =  "API_URL_ADRESINIZ?card_uid=";
 
 #define RST_PIN  5 // GPIO5 / D1
 #define SS_PIN  4 // GPIO4  / D2
@@ -153,4 +153,3 @@ void HttpSend(String card_uid) {
 
   http.end();
 }
-
