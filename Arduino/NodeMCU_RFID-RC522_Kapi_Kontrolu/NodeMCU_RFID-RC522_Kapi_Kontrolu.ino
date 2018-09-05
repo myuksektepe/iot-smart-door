@@ -12,25 +12,27 @@
     SCK     =   GPIO14 / D5
     MOSI    =   GPIO13 / D7
     MISO    =   GPIO12 / D6
-    IRQ     =   
+    IRQ     =
     GND     =   GND
     RST     =   GPIO5 / D1
     3.3V    =   3.3V
 
 
   ROLE => NodeMCU 8266
-  
+
     GND     =   GND
     3.3V    =   3.3V
     S       =   GPIO2 / D4
 */
 
 // Wifi Bağlantısı
-const char *ssid =  "WIFI_ISMINIZ";
-const char *pass =  "WIFI_SIFRENIZ";
+const char *ssid =  "MakdosHQ";
+const char *pass =  "Makdos.2017.";
 
 // API Url
-const char *apiUrl =  "API_URL_ADRESINIZ?card_uid=";
+// const char *apiUrl =  "http://api.kodz.org/mcu/rfiddoor/sorgu.php?card_uid=";
+const char *apiUrl =  "http://185.122.200.14/api/control/?door_id=1&card_identity=";
+
 
 #define RST_PIN  5 // GPIO5 / D1
 #define SS_PIN  4 // GPIO4  / D2
@@ -38,7 +40,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 int ROLE = 2; // GPIO2 / D4
 
 void setup() {
-  
+
   pinMode(ROLE, OUTPUT);
 
   Serial.begin(115200);
@@ -66,7 +68,7 @@ void setup() {
 }
 
 void loop() {
-  
+
   if ( ! mfrc522.PICC_IsNewCardPresent()) {
     delay(50);
     return;
@@ -74,7 +76,7 @@ void loop() {
     unsigned long uid = getID();
     if (uid != -1) {
       Serial.println(F("======================================================"));
-      Serial.print("Kart UID: ");
+      Serial.print("Kart Kimliği: ");
       Serial.println(uid);
 
       HttpSend(String(uid));
@@ -124,25 +126,24 @@ void HttpSend(String card_uid) {
 
     // Parameters
     boolean status = root["status"];
-    const char* card_uid = root["card_uid"];
+    const char* card_identity = root["card_identity"];
+    const char* door = root["door"];
     const char* message = root["message"];
-    const char* user_name = root["user_name"];
-    const char* date = root["date"];
-    const char* last_login_date = root["last_login_date"];
+    const char* reason = root["reason"];
+    const char* personnel_name = root["personnel_name"];
 
 
     // Role Kontrolü
     if (status) {
       digitalWrite(ROLE, HIGH);
-      delay(3000);
+      delay(1000);
       digitalWrite(ROLE, LOW);
-    }    
+    }
 
-
+    Serial.print("Personel: "); Serial.println(personnel_name);
+    Serial.print("Kapı: "); Serial.println(door);
     Serial.print("Mesaj: "); Serial.println(message);
-    Serial.print("Kullanici: "); Serial.println(user_name);
-    Serial.print("Tarih: "); Serial.println(date);
-    Serial.print("Son Giris Tarihi: "); Serial.println(last_login_date);
+    Serial.print("Sebep: "); Serial.println(reason);
   } else {
     Serial.println("Internet Baglantisi Yok. Tekrar Deneyiniz.");
     delay(100);
