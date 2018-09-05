@@ -12,6 +12,8 @@
                 <th>Kullanıcı</th>
                 <th>Kart</th>
                 <th>Kapı</th>
+                <th>Sonuç</th>
+                <th>Sebep</th>
                 <th>Tarih</th>
             </tr>
             </thead>
@@ -19,7 +21,22 @@
             {% for log in logs %}
                 <tr>
                     <td>
-                        {{ log }}
+                        {{ log.personnel }}
+                    </td>
+                    <td>
+                        {{ log.card }}
+                    </td>
+                    <td>
+                        {{ log.door }}
+                    </td>
+                    <td>
+                        {{ log.message }}
+                    </td>
+                    <td>
+                        {{ log.reason }}
+                    </td>
+                    <td>
+                        {{ log.create_at }}
                     </td>
                 </tr>
             {% endfor %}
