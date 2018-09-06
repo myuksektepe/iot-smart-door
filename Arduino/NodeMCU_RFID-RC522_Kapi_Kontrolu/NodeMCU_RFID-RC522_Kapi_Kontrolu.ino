@@ -26,16 +26,19 @@
 */
 
 // WIFI SSID (ADI)
-const char *ssid =  "MakdosHQ";
+const char *ssid =  "WIFI_ISMI";
 
 // WIFI PAROLASI
-const char *pass =  "Makdos.2017.";
+const char *pass =  "WIFI_SIFRESI";
 
 // KAPI ID'si
 String door_id = "1";
 
 // API URL
-String apiUrl = "http://185.122.200.14/api/control/?door_id=" + door_id + "&card_identity=";
+String apiUrl = "http://IP_ADRESI/api/control/?door_id=" + door_id + "&card_identity=";
+
+// INTERNETSIZ GECIS YAPABILECEK KARTLAR
+int nonetcards[] = {2697911972, 1353262500};
 
 
 #define RST_PIN  5
@@ -109,14 +112,15 @@ void loop() {
         // INTERNET BAGLANTISI YOKSA
       } else {
 
-        if (card_identity == 2697911972) {
-          // ROLE YONETIMI
-          Serial.println(F("======================================================"));
-          Serial.println(F("Gecis Iznı Verildi. (Semih Basoglu)"));
-          digitalWrite(ROLE, HIGH);
-          delay(1000);
-          digitalWrite(ROLE, LOW);
-
+        for (int i = 0; i < sizeof(nonetcards) - 1; i++) {
+          if (card_identity == nonetcards[i]) {
+            // ROLE YONETIMI
+            Serial.println(F("======================================================"));
+            Serial.println("Gecis Iznı Verildi. Kart ID=" + String(nonetcards[i]));
+            digitalWrite(ROLE, HIGH);
+            delay(1000);
+            digitalWrite(ROLE, LOW);
+          }
         }
       }
     }
