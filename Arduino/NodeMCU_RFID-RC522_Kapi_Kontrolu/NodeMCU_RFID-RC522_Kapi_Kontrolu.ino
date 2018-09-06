@@ -25,19 +25,23 @@
     S       =   GPIO2 / D4
 */
 
-// Wifi Bağlantısı
+// WIFI SSID (ADI)
 const char *ssid =  "MakdosHQ";
+
+// WIFI PAROLASI
 const char *pass =  "Makdos.2017.";
 
-// API Url
-// const char *apiUrl =  "http://api.kodz.org/mcu/rfiddoor/sorgu.php?card_uid=";
-const char *apiUrl =  "http://185.122.200.14/api/control/?door_id=1&card_identity=";
+// KAPI ID'si
+String door_id = "1";
+
+// API URL
+String apiUrl = "http://185.122.200.14/api/control/?door_id=" + door_id + "&card_identity=";
 
 
-#define RST_PIN  5 // GPIO5 / D1
-#define SS_PIN  4 // GPIO4  / D2
+#define RST_PIN  5
+#define SS_PIN  4
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-int ROLE = 2; // GPIO2 / D4
+int ROLE = 2;
 
 void setup() {
 
@@ -45,7 +49,7 @@ void setup() {
 
   Serial.begin(115200);
   delay(250);
-  Serial.println(F("Baglaniyor...."));
+  Serial.print(F("WIFI Baglaniyor"));
 
   SPI.begin();
   mfrc522.PCD_Init();
@@ -54,32 +58,67 @@ void setup() {
 
   int retries = 0;
   while ((WiFi.status() != WL_CONNECTED) && (retries < 10)) {
+
     retries++;
     delay(500);
     Serial.print(".");
-  }
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println(F("WiFi Bağlandı."));
+
   }
 
-  Serial.println(F("Hazır!"));
-  Serial.println(F("======================================================"));
-  Serial.println(F("Lütfen Kartınızı Gösteriniz"));
+  if (WiFi.status() == WL_CONNECTED) {
+
+    Serial.println(F(""));
+    Serial.println(F("WiFi Baglantisi BASARILI!"));
+    Serial.println(F("Her Sey Hazir!"));
+    Serial.println(F("======================================================"));
+    Serial.println(F("Lutfen Kartinizi Gosteriniz."));
+
+  } else {
+
+    Serial.println(F("WiFi Baglantisi BASARISIZ!"));
+    Serial.println(F("Lutfen baglanti icin girdiginiz degerlerin dogrulundan emin olun."));
+
+  }
 }
 
 void loop() {
 
+  // HER YARIM SANIYEDE BIR YENI KART SORGULA
   if ( ! mfrc522.PICC_IsNewCardPresent()) {
-    delay(50);
+    delay(500);
     return;
+
+    // EGER BIR KART OKUTULURSA
   } else {
-    unsigned long uid = getID();
-    if (uid != -1) {
+
+    // KART ID'SINI TESPIT ET
+    unsigned long card_identity = getID();
+
+    if (card_identity != -1) {
       Serial.println(F("======================================================"));
       Serial.print("Kart Kimliği: ");
-      Serial.println(uid);
+      Serial.println(card_identity);
 
-      HttpSend(String(uid));
+
+      // INTERNET BAGLANTISI VARSA
+      if (WiFi.status() == WL_CONNECTED) {
+
+        // KART ID'SINI API'DA SORGULA
+        HttpSend(String(card_identity));
+
+        // INTERNET BAGLANTISI YOKSA
+      } else {
+
+        if (card_identity == 2697911972) {
+          // ROLE YONETIMI
+          Serial.println(F("======================================================"));
+          Serial.println(F("Gecis Iznı Verildi. (Semih Basoglu)"));
+          digitalWrite(ROLE, HIGH);
+          delay(1000);
+          digitalWrite(ROLE, LOW);
+
+        }
+      }
     }
   }
 
@@ -106,48 +145,52 @@ unsigned long getID() {
   hex_num += mfrc522.uid.uidByte[1] << 16;
   hex_num += mfrc522.uid.uidByte[2] <<  8;
   hex_num += mfrc522.uid.uidByte[3];
-  mfrc522.PICC_HaltA(); // Stop reading
+  mfrc522.PICC_HaltA(); // Okumayı durdur
   return hex_num;
 }
 
-void HttpSend(String card_uid) {
+void HttpSend(String card_identity) {
   HTTPClient http;
 
-  http.begin(apiUrl + card_uid);
+  http.begin(apiUrl + card_identity);
   int httpCode = http.GET();
 
   if (httpCode > 0) {
     String result = http.getString();
 
-    // JSON Parsing
+    // JSON Parçalama
     const size_t bufferSize = JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(8) + 370;
     DynamicJsonBuffer jsonBuffer(bufferSize);
-    JsonObject& root = jsonBuffer.parseObject(result);
+    JsonObject& json_object = jsonBuffer.parseObject(result);
 
-    // Parameters
-    boolean status = root["status"];
-    const char* card_identity = root["card_identity"];
-    const char* door = root["door"];
-    const char* message = root["message"];
-    const char* reason = root["reason"];
-    const char* personnel_name = root["personnel_name"];
+    // Parametreler
+    boolean status = json_object["status"];
+    const char* card_identity = json_object["card_identity"];
+    const char* door = json_object["door"];
+    const char* message = json_object["message"];
+    const char* reason = json_object["reason"];
+    const char* personnel_name = json_object["personnel_name"];
 
 
-    // Role Kontrolü
+    // Role Yönetimi
     if (status) {
       digitalWrite(ROLE, HIGH);
       delay(1000);
       digitalWrite(ROLE, LOW);
     }
 
+    // JSON'dan Donen Sonuclar
     Serial.print("Personel: "); Serial.println(personnel_name);
     Serial.print("Kapı: "); Serial.println(door);
     Serial.print("Mesaj: "); Serial.println(message);
     Serial.print("Sebep: "); Serial.println(reason);
+
   } else {
+
     Serial.println("Internet Baglantisi Yok. Tekrar Deneyiniz.");
     delay(100);
     return;
+
   }
   Serial.println(F("======================================================"));
   Serial.println(F("======================================================"));
